@@ -90,8 +90,49 @@ end function
 function parse_element() as object:
     consume_char()
     tag_name = parse_tag_name()
+    attributes = parse_attributes()
+    print "consume_char should be open quote =", consume_char()
+
+    children = parse_nodes(m.parser)
+
     consume_char()
-    return create_web_node_element(tag_name, invalid, invalid)
+    consume_char()
+    parse_tag_name()
+    consume_char()
+    return create_web_node_element(tag_name, attributes, children)
+end function
+
+function parse_attr() as object:
+    name = parse_tag_name()
+    consume_char()
+    value = parse_attr_value()
+    print "parse_attr|name=", name, "|value=", value, "|next_char=", consume_char()
+    return { name: name, value: value }
+end function
+
+function is_not_open_quote(current_char)
+    return current_char <> m.open_quote
+end function
+
+function parse_attr_value() as string:
+    m.open_quote = consume_char()
+    print "open_quote=", m.open_quote
+    return consume_while(is_not_open_quote)
+end function
+
+function parse_attributes() as object:
+    attributes = {}
+    print "parse_attributes|next_char=", next_char()
+    while (true):
+        if (next_char() = ">"):
+            exit while
+        end if
+        consume_whitespace()
+        attribute = parse_attr()
+        attributes[attribute.name] = attribute.value
+        print "parse_attributes|next_char=", next_char()
+    end while
+    return attributes
 end function
 
 function parse_node() as object:
@@ -121,11 +162,11 @@ end function
 function parse_web(source as string) as object:
     parser = create_parser(1, source)
     nodes = parse_nodes(parser)
-    for each node in nodes:
+    for each node in nodes[0].children:
         if (node.node_type.element <> invalid) then
-            print node.node_type.element
+            print node.node_type.element.attributes
         else
-            print node.node_type.text
+            print node.node_type
         end if
     end for
     return nodes
