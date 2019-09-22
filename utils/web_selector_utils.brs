@@ -2,7 +2,6 @@ function parse_stylesheet(source as string):
     parser = create_parser(1, source)
     m.parser = parser
     rules = parse_rules()
-    print rules[1].selectors[0].selector
     return {
         rules: rules
     }
