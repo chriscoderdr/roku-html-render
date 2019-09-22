@@ -3,6 +3,7 @@
 
   <script type="text/brightscript" uri="pkg:/utils/web_selector_utils.brs" />
   <script type="text/brightscript" uri="pkg:/utils/web_node_utils.brs" />
+  <script type="text/brightscript" uri="pkg:/utils/web_styles_utils.brs" />
   <script type="text/brightscript" uri="pkg:/components/home_scene/home_scene.brs" />
   <children>
     <Rectangle translation="[950, 530]" width="20" height="20" id="center_square" color="0xFF0000"/>

@@ -6,7 +6,12 @@ function init()
 	m.center_square.setFocus(true)
 
 
-	print parse_web("<html id='test'><body fontSize='16'>Hello, world!</body></html>")[0].node_type.element.attributes
-	print parse_stylesheet("h1, h2, h3 { margin: auto; color: #cc0000; } div.note { margin-bottom: 20px; padding: 10px; } #answer { display: none; }")
+	dom = parse_web("<html test='true'><body fontSize='16'><p>Hello, world!</p><p>More Text</p></body></html>")[0]
+	m.parser = invalid
+	css = parse_stylesheet("h1, h2, h3 { margin: auto; color: #cc0000; } div.note { margin-bottom: 20px; padding: 10px; } #answer { display: none; }")
+	style_tree_result = style_tree(dom, css)
+	m.parser = invalid
 
+	layout_tree_value = build_layout_tree(style_tree_result.node)
+	paint(layout_tree_value, {})
 end function

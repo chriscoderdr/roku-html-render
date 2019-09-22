@@ -81,7 +81,6 @@ function char_is_open(char as string) as boolean:
 end function
 
 function parse_text() as object:
-
     text_value = consume_while(char_is_open)
     return text_value
 end function
@@ -97,6 +96,7 @@ function parse_element() as object:
     consume_char()
     parse_tag_name()
     consume_char()
+
     return create_web_node_element(tag_name, attributes, children)
 end function
 
@@ -121,10 +121,10 @@ function parse_attributes() as object:
     attributes = {}
     while (true):
         if (next_char() = ">"):
+        consume_char()
             exit while
         end if
         consume_whitespace()
-        print "parse_attributes,next_char=", next_char()
         attribute = parse_attr()
         attributes[attribute.name] = attribute.value
         consume_char()
