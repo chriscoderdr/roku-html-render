@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SelectorColor" extends="ContentNode">
+    <interface>
+        <field id="r" type="integer" />
+        <field id="g" type="integer" />
+        <field id="b" type="integer" />
+        <field id="a" type="integer" />
+    </interface>
+</component>

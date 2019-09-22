@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SimpleSelector" extends="ContentNode">
+    <interface>
+        <field id="id" type="string" />
+        <field id="tag_name" type="string" />
+        <field id="class" type="roArray" />
+    </interface>
+</component>

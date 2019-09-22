@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SelectorValue" extends="ContentNode">
+    <interface>
+        <field id="keyword" type="string" />
+        <field id="length" type="assocarray" />
+        <field id="color_value" type="node" />
+    </interface>
+</component>
