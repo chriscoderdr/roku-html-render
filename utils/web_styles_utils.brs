@@ -100,6 +100,10 @@ function paint_item(item as object) as object:
         m.newItem = createObject("RoSGNode", "Label")
         ' m.newItem.translation = [0, 0]
         m.newItem.text = item.text
+        if (m.top.getChildCount() > 0) then
+            lastItemBoundingRect = m.top.getChild(m.top.getChildCount() - 1).boundingRect()
+            m.newItem.translation = [0, lastItemBoundingRect.y + lastItemBoundingRect.height]
+        end if
         m.top.appendChild(m.newItem)
     end if
 end function

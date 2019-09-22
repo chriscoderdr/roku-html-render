@@ -6,7 +6,5 @@
   <script type="text/brightscript" uri="pkg:/utils/web_styles_utils.brs" />
   <script type="text/brightscript" uri="pkg:/components/home_scene/home_scene.brs" />
   <children>
-    <Rectangle translation="[950, 530]" width="20" height="20" id="center_square" color="0xFF0000"/>
-    <Label translation="[1720, 980]" id="label_hello" font="font:LargeBoldSystemFont" color="0x000000" text="Hello."/>
   </children>
 </component>
