@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ElementData" extends="ContentNode">
+    <interface>
+        <field id="tag_name" type="string" />
+        <field id="attributes" type="assocarray" />
+    </interface>
+</component>

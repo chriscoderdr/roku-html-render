@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="WebParser" extends="ContentNode">
+<script type="text/brightscript" uri="pkg:/components/data/web_parser/web_parser.brs" />
+    <interface>
+        <field id="pos" type="integer" />
+        <field id="input" type="string" />
+    </interface>
+</component>

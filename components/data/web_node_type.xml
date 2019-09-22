@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="WebNodeType" extends="ContentNode">
+    <interface>
+        <field id="text" type="string" />
+        <field id="element" type="node" />
+    </interface>
+</component>
