@@ -14,3 +14,4 @@ splash_screen_hd=pkg:/images/splash_hd.png
 
 ### Custom Value, defined by you
 custom_field=hello_world
+ui_resolutions=FHD

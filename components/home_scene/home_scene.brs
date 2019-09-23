@@ -13,6 +13,5 @@ sub fetch()
 end sub
 
 sub setContent()
-	' print m.downloadSubsTask.content
 	paint(m.downloadSubsTask.content, {})
 end sub

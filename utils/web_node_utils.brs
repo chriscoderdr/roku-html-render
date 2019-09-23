@@ -2,7 +2,7 @@ function create_web_text_node(data as string) as object:
     node = createObject("RoSGNode", "WebNode")
     node.children = CreateObject("roArray", 26, true)
     node.node_type = createObject("RoSGNode", "WebNodeType")
-    node.node_type.text = data
+    node.node_type.text = data.trim()
     return node
 end function
 

@@ -94,18 +94,18 @@ end function
 
 
 function paint_item(item as object) as object:
-print "painting_item"
     if item.type = "text"
-        print "paint_item", item
         m.newItem = createObject("RoSGNode", "Label")
-        ' m.newItem.translation = [0, 0]
-        m.newItem.text = item.text
+        regex = createObject("roRegex", "[\x0A\x0D\x09]", "i")
+        m.newItem.text = regex.replaceAll(item.text.replace("&#39;", "´").replace("&quot;", """").replace("&mdash;", "—").replace("\xc2\xa0", "\x20"), " ")
         m.newItem.color = "0xFF0000"
+        print "painting_item|", item
         if (m.top.getChildCount() > 0) then
             lastItemBoundingRect = m.top.getChild(m.top.getChildCount() - 1).boundingRect()
             m.newItem.translation = [0, lastItemBoundingRect.y + lastItemBoundingRect.height]
         end if
         m.top.appendChild(m.newItem)
+        m.top.setFocus(true)
     end if
 end function
 
