@@ -101,7 +101,7 @@ print "painting_item"
         ' m.newItem.translation = [0, 0]
         m.newItem.text = item.text
         m.newItem.color = "0xFF0000"
-        if (m.top.getChildCount() > 1) then
+        if (m.top.getChildCount() > 0) then
             lastItemBoundingRect = m.top.getChild(m.top.getChildCount() - 1).boundingRect()
             m.newItem.translation = [0, lastItemBoundingRect.y + lastItemBoundingRect.height]
         end if
