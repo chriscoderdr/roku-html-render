@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+  <h1><a href="/mbrubeck/">Matt Brubeck</a></h1>
+  <p>11 Aug 2014</p>
+  <h1>Let's build a browser engine!</h1>
+  <h2>Part 2: HTML</h2>
+  <p>This is the second in a series of articles on building a toy browser rendering engine:</p>
+  <ul>
+    <li>
+      <a href="/mbrubeck/2014/08/08/toy-layout-engine-1.html">Part 1: Getting started</a>
+    </li>
+    <li><strong>Part 2: HTML</strong></li>
+    <li>
+      <a href="/mbrubeck/2014/08/13/toy-layout-engine-3-css.html">Part 3: CSS</a>
+    </li>
+    <li>
+      <a href="/mbrubeck/2014/08/23/toy-layout-engine-4-style.html">Part 4: Style</a>
+    </li>
+    <li>
+      <a href="/mbrubeck/2014/09/08/toy-layout-engine-5-boxes.html">Part 5: Boxes</a>
+    </li>
+    <li>
+      <a href="/mbrubeck/2014/09/17/toy-layout-engine-6-block.html">Part 6: Block layout</a>
+    </li>
+    <li>
+      <a href="/mbrubeck/2014/11/05/toy-layout-engine-7-painting.html">Part 7: Painting 101</a>
+    </li>
+  </ul>
+  <p>This article is about parsing <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/introduction.html#a-quick-introduction-to-html">HTML source code</a> to produce a tree of DOM nodes. Parsing is a fascinating topic, but I don't have the time or expertise to give it the introduction it deserves. You can get a detailed introduction to parsing from any good <a href="https://www.coursera.org/course/compilers">course</a> or <a href="http://www.amazon.com/Compilers-Principles-Techniques-Tools-Edition/dp/0321486811">book</a> on compilers. Or get a hands-on start by going through the documentation for a <a href="https://en.wikipedia.org/wiki/Comparison_of_parser_generators">parser generator</a> that works with your chosen programming language.</p>
+  <p>HTML has its own unique <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/syntax.html#parsing">parsing algorithm</a>. Unlike parsers for most programming languages and file formats, the HTML parsing algorithm does not reject invalid input. Instead it includes specific error-handling instructions, so web browsers can agree on how to display every web page, even ones that don't conform to the syntax rules. Web browsers have to do this to be usable: Since non-conforming HTML has been supported since the early days of the web, it is now used in a huge portion of existing web pages.</p>
+  <h2>A Simple HTML Dialect</h2>
+  <p>I didn't even try to implement the standard HTML parsing algorithm. Instead I wrote a basic parser for a tiny subset of HTML syntax. My parser can handle simple pages like this:</p>&lt;html&gt; &lt;body&gt; &lt;h1&gt;Title&lt;/h1&gt; &lt;div id="main" class="test"&gt; &lt;p&gt;Hello &lt;em&gt;world&lt;/em&gt;!&lt;/p&gt; &lt;/div&gt; &lt;/body&gt; &lt;/html&gt;
+  <p>The following syntax is allowed:</p>
+  <ul>
+    <li>Balanced tags: &lt;p&gt;...&lt;/p&gt;</li>
+    <li>Attributes with quoted values: id="main"</li>
+    <li>Text nodes: &lt;em&gt;world&lt;/em&gt;</li>
+  </ul>
+  <p>Everything else is unsupported, including:</p>
+  <ul>
+    <li>Comments</li>
+    <li>Doctype declarations</li>
+    <li>Escaped characters (like &amp;amp;) and CDATA sections</li>
+    <li>Self-closing tags: &lt;br/&gt; or &lt;br&gt; with no closing tag</li>
+    <li>Error handling (e.g. unbalanced or improperly nested tags)</li>
+    <li>Namespaces and other XHTML syntax: &lt;html:body&gt;</li>
+    <li>Character encoding detection</li>
+  </ul>
+  <p>At each stage of this project I'm writing more or less the minimum code needed to support the later stages. But if you want to learn more about parsing theory and tools, you can be much more ambitious in your own project!</p>
+  <h2>Example Code</h2>
+  <p>Next, let's walk through my toy HTML parser, keeping in mind that this is just one way to do it (and probably not the best way). Its structure is based loosely on the <a href="https://github.com/servo/rust-cssparser/blob/032e7aed7acc31350fadbbc3eb5a9bbf6f4edb2e/src/tokenizer.rs">tokenizer</a> module from Servo's <a href="https://github.com/servo/rust-cssparser">cssparser</a> library. It has no real error handling; in most cases, it just aborts when faced with unexpected syntax. The code is in <a href="http://www.rust-lang.org/">Rust</a>, but I hope it's fairly readable to anyone who's used similar-looking languages like Java, C++, or C#. It makes use of the DOM data structures from <a href="/mbrubeck/2014/08/08/toy-layout-engine-1.html">part 1</a>.</p>
+  <p>The parser stores its input string and a current position within the string. The position is the index of the next character we haven't processed yet.</p>struct Parser { pos: usize, // "usize" is an unsigned integer, similar to "size_t" in C input: String, }
+  <p>We can use this to implement some simple methods for peeking at the next characters in the input:</p>impl Parser { // Read the current character without consuming it. fn next_char(&amp;self) -&gt; char { self.input[self.pos..].chars().next().unwrap() } // Do the next characters start with the given string? fn starts_with(&amp;self, s: &amp;str) -&gt; bool { self.input[self.pos ..].starts_with(s) } // Return true if all input is consumed. fn eof(&amp;self) -&gt; bool { self.pos &gt;= self.input.len() } // ... }
+  <p>Rust strings are stored as <a href="https://en.wikipedia.org/wiki/UTF-8">UTF-8</a> byte arrays. To go to the next character, we can't just advance by one byte. Instead we use char_indices which correctly handles multi-byte characters. (If our string used fixed-width characters, we could just increment pos by 1.)</p>// Return the current character, and advance self.pos to the next character. fn consume_char(&amp;mut self) -&gt; char { let mut iter = self.input[self.pos..].char_indices(); let (_, cur_char) = iter.next().unwrap(); let (next_pos, _) = iter.next().unwrap_or((1, ' ')); self.pos += next_pos; return cur_char; }
+  <p>Often we will want to consume a string of consecutive characters. The consume_while method consumes characters that meet a given condition, and returns them as a string. This method's argument is a function that takes a char and returns a bool.</p>// Consume characters until `test` returns false. fn consume_while&lt;F&gt;(&amp;mut self, test: F) -&gt; String where F: Fn(char) -&gt; bool { let mut result = String::new(); while !self.eof() &amp;& test(self.next_char()) { result.push(self.consume_char()); } return result; }
+  <p>We can use this to ignore a sequence of space characters, or to consume a string of alphanumeric characters:</p>// Consume and discard zero or more whitespace characters. fn consume_whitespace(&amp;mut self) { self.consume_while(CharExt::is_whitespace); } // Parse a tag or attribute name. fn parse_tag_name(&amp;mut self) -&gt; String { self.consume_while(|c| match c { 'a'...'z' | 'A'...'Z' | '0'...'9' =&gt; true, _ =&gt; false }) }
+  <p>Now we're ready to start parsing HTML. To parse a single node, we look at its first character to see if it is an element or a text node. In our simplified version of HTML, a text node can contain any character except &lt;.</p>// Parse a single node. fn parse_node(&amp;mut self) -&gt; dom::Node { match self.next_char() { '&lt;' =&gt; self.parse_element(), _ =&gt; self.parse_text() } } // Parse a text node. fn parse_text(&amp;mut self) -&gt; dom::Node { dom::text(self.consume_while(|c| c != '&lt;')) }
+  <p>An element is more complicated. It includes opening and closing tags, and between them any number of child nodes:</p>// Parse a single element, including its open tag, contents, and closing tag. fn parse_element(&amp;mut self) -&gt; dom::Node { // Opening tag. assert!(self.consume_char() == '&lt;'); let tag_name = self.parse_tag_name(); let attrs = self.parse_attributes(); assert!(self.consume_char() == '&gt;'); // Contents. let children = self.parse_nodes(); // Closing tag. assert!(self.consume_char() == '&lt;'); assert!(self.consume_char() == '/'); assert!(self.parse_tag_name() == tag_name); assert!(self.consume_char() == '&gt;'); return dom::elem(tag_name, attrs, children); }
+  <p>Parsing attributes is pretty easy in our simplified syntax. Until we reach the end of the opening tag (&gt;) we repeatedly look for a name followed by = and then a string enclosed in quotes.</p>// Parse a single name="value" pair. fn parse_attr(&amp;mut self) -&gt; (String, String) { let name = self.parse_tag_name(); assert!(self.consume_char() == '='); let value = self.parse_attr_value(); return (name, value); } // Parse a quoted value. fn parse_attr_value(&amp;mut self) -&gt; String { let open_quote = self.consume_char(); assert!(open_quote == '"' || open_quote == '\''); let value = self.consume_while(|c| c != open_quote); assert!(self.consume_char() == open_quote); return value; } // Parse a list of name="value" pairs, separated by whitespace. fn parse_attributes(&amp;mut self) -&gt; dom::AttrMap { let mut attributes = HashMap::new(); loop { self.consume_whitespace(); if self.next_char() == '&gt;' { break; } let (name, value) = self.parse_attr(); attributes.insert(name, value); } return attributes; }
+  <p>To parse the child nodes, we recursively call parse_node in a loop until we reach the closing tag. This function returns a Vec, which is Rust's name for a growable array.</p>// Parse a sequence of sibling nodes. fn parse_nodes(&amp;mut self) -&gt; Vec&lt;dom::Node&gt; { let mut nodes = Vec::new(); loop { self.consume_whitespace(); if self.eof() || self.starts_with("&lt;/") { break; } nodes.push(self.parse_node()); } return nodes; }
+  <p>Finally, we can put this all together to parse an entire HTML document into a DOM tree. This function will create a root node for the document if it doesn't include one explicitly; this is similar to what a real HTML parser does.</p>// Parse an HTML document and return the root element. pub fn parse(source: String) -&gt; dom::Node { let mut nodes = Parser { pos: 0, input: source }.parse_nodes(); // If the document contains a root element, just return it. Otherwise, create one. if nodes.len() == 1 { nodes.swap_remove(0) } else { dom::elem("html".to_string(), HashMap::new(), nodes) } }
+  <p>That's it! The entire code for the <a href="https://github.com/mbrubeck/robinson/blob/master/src/html.rs">robinson HTML parser</a>. The whole thing weighs in at just over 100 lines of code (not counting blank lines and comments). If you use a good library or parser generator, you can probably build a similar toy parser in even less space.</p>
+  <h2>Exercises</h2>
+  <p>Here are a few alternate ways to try this out yourself. As before, you can <strong>choose one or more</strong> of them and ignore the others.</p>
+  <ol>
+    <li>
+      <p>Build a parser (either "by hand" or with a library or parser generator) that takes a subset of HTML as input and produces a tree of DOM nodes.</p>
+    </li>
+    <li>
+      <p>Modify robinson's HTML parser to add some missing features, like comments. Or replace it with a better parser, perhaps built with a library or generator.</p>
+    </li>
+    <li>
+      <p>Create an invalid HTML file that causes your parser (or mine) to fail. Modify the parser to recover from the error and produce a DOM tree for your test file.</p>
+    </li>
+  </ol>
+  <h2>Shortcuts</h2>
+  <p>If you want to skip parsing completely, you can build a DOM tree programmatically instead, by adding some code like this to your program (in pseudo-code; adjust it to match the DOM code you wrote in Part 1):</p>// &lt;html&gt;&lt;body&gt;Hello, world!&lt;/body&gt;&lt;/html&gt; let root = element("html"); let body = element("body"); root.children.push(body); body.children.push(text("Hello, world!"));
+  <p>Or you can find an existing HTML parser and incorporate it into your program.</p>
+  <p>The <a href="/mbrubeck/2014/08/13/toy-layout-engine-3-css.html">next article</a> in this series will cover CSS data structures and parsing.</p><a href="/mbrubeck/atom.xml">Subscribe</a> <a href="/mbrubeck/colophon.html">About</a>
+</body>
+</html>

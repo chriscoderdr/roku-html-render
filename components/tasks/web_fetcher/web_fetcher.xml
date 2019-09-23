@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="WebFetcher" extends="Task" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://devtools.web.roku.com/schema/RokuSceneGraph.xsd">
+
+    <script type="text/brightscript" uri="pkg:/utils/web_selector_utils.brs" />
+    <script type="text/brightscript" uri="pkg:/utils/web_node_utils.brs" />
+    <script type="text/brightscript" uri="pkg:/utils/web_styles_utils.brs" />
+    <script type="text/brightscript" uri="pkg:/components/tasks/web_fetcher/web_fetcher.brs" />
+
+    <interface>
+        <field id="content" type="assocarray" />
+    </interface>
+</component>

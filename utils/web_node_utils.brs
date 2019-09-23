@@ -121,7 +121,7 @@ function parse_attributes() as object:
     attributes = {}
     while (true):
         if (next_char() = ">"):
-        consume_char()
+            consume_char()
             exit while
         end if
         consume_whitespace()
@@ -159,5 +159,8 @@ end function
 function parse_web(source as string) as object:
     parser = create_parser(1, source)
     nodes = parse_nodes(parser)
-    return nodes
+    if nodes[0] <> invalid then
+        return nodes[0]
+        return create_web_node_element("html", {}, nodes)
+    end if
 end function

@@ -2,7 +2,6 @@ function style_tree(root as object, stylesheet as object) as object:
     styledNode = {
         node: root,
     }
-    ' print styledNode
     if (root.node_type.element <> invalid) then
         styledNode.specified_values = {}
     else:
@@ -70,7 +69,7 @@ function create_edge_sizes(left, right, top, bottom) as object:
 end function
 
 sub render_text(layout_box as object)
-    if (layout_box.box_type.node.node_type.text <> "")
+    if (layout_box.box_type.node.node_type.text.trim() <> "")
         m.display_list.push({ text: layout_box.box_type.node.node_type.text, type: "text" })
     end if
 end sub
@@ -95,12 +94,14 @@ end function
 
 
 function paint_item(item as object) as object:
-    print "paint_item"
+print "painting_item"
     if item.type = "text"
+        print "paint_item", item
         m.newItem = createObject("RoSGNode", "Label")
         ' m.newItem.translation = [0, 0]
         m.newItem.text = item.text
-        if (m.top.getChildCount() > 0) then
+        m.newItem.color = "0xFF0000"
+        if (m.top.getChildCount() > 1) then
             lastItemBoundingRect = m.top.getChild(m.top.getChildCount() - 1).boundingRect()
             m.newItem.translation = [0, lastItemBoundingRect.y + lastItemBoundingRect.height]
         end if
